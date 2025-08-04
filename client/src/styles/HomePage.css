@@ -10,6 +10,8 @@
 .home-page {
   display: flex;
   flex-wrap: wrap;
+  margin:auto;
+  background: linear-gradient(135deg, #87CEEB, #D8B4FE);
 }
 .home-page .card {
   background-color: rgba(128, 128, 128, 0.097);
@@ -50,8 +52,8 @@ filters
 ============== */
 .filters h4 {
   margin-top: 100px;
-  color: gray !important;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.337);
+  color: black !important;
+  border: 2px solid rgba(10, 9, 9, 0.337);
 }
 
 .ant-checkbox-wrapper:first-of-type {
