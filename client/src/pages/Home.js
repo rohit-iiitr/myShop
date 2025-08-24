@@ -133,7 +133,7 @@ const HomePage = () => {
 
       <div className="container-fluid row home-page pb-4">
         <div className="col-md-3 filters">
-          <h4 className="text-center mb-3">Filter By Category</h4>
+          {/* <h4 className="text-center mb-3">Filter By Category</h4>
           <div className="d-flex flex-column">
             {categories?.map((c) => (
               <Checkbox
@@ -143,7 +143,7 @@ const HomePage = () => {
                 {c.name}
               </Checkbox>
             ))}
-          </div>
+          </div> */}
           {/* price filter */}
           <h4 className="text-center mt-4">Filter By Price</h4>
           <div className="d-flex flex-column">
