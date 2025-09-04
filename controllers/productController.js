@@ -329,7 +329,7 @@ export const productCategoryController = async (req, res) => {
 
 export const PaymentController = async (req, res) => {
   try {
-    const { cart, payment } = req.body;
+    const { cart } = req.body;
 
     if (!Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({ error: "Cart is empty or invalid." });
@@ -344,11 +344,10 @@ export const PaymentController = async (req, res) => {
     });
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(total * 100), // Ensure it's an integer
+      amount: Math.round(total * 100), // cents
       currency: "usd",
       automatic_payment_methods: { enabled: true },
     });
-
 
     res.status(200).json({
       success: true,
@@ -356,9 +355,10 @@ export const PaymentController = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Stripe Payment Error:", err);
-    res.status(500).send({ error: "Payment failed", message: err.message });
+    res.status(500).json({ error: "Payment failed", message: err.message });
   }
 };
+
 
 export const PaymentConfirm = async (req, res) => {
   try {
@@ -368,7 +368,7 @@ export const PaymentConfirm = async (req, res) => {
       return res.status(400).json({ error: "Cart is empty or invalid." });
     }
 
-    // ✅ Recalculate total on backend for validation
+    // ✅ Recalculate total
     let total = 0;
     cart.forEach((item) => {
       if (typeof item.price !== "number") {
@@ -377,13 +377,11 @@ export const PaymentConfirm = async (req, res) => {
       total += item.price;
     });
 
-    // ✅ Verify payment with Stripe
+    // ✅ Verify payment status with Stripe
     const verifiedPayment = await stripe.paymentIntents.retrieve(payment.id);
-
     if (verifiedPayment.status !== "succeeded") {
       return res.status(400).json({ error: "Payment not confirmed." });
     }
-
     if (verifiedPayment.amount !== Math.round(total * 100)) {
       return res.status(400).json({ error: "Payment amount mismatch." });
     }
@@ -394,7 +392,7 @@ export const PaymentConfirm = async (req, res) => {
       payment: {
         id: payment.id,
         amount: verifiedPayment.amount,
-        success: true, // ✅ We know it's succeeded after verification
+        success: true,
       },
       status: "Not Process",
       ...(req.user?._id && { buyer: req.user._id }),
@@ -407,7 +405,7 @@ export const PaymentConfirm = async (req, res) => {
       message: "Order placed successfully.",
     });
   } catch (err) {
-    console.error("❌ PaymentController Error:", err.message);
+    console.error("❌ PaymentConfirm Error:", err.message);
     res.status(500).json({
       success: false,
       error: "Server Error",
