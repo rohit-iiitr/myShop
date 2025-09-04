@@ -14,7 +14,11 @@ dotenv.config();
 connectDB();
 // morgan.config();
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "https://my-shop-five-eta.vercel.app", // frontend ka domain
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
 app.use(morgan("dev"));
 app.use("/api/v1/auth", authRoutes);
