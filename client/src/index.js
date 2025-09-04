@@ -11,7 +11,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
 
-const stripePromise = loadStripe("pk_test_51RmajpGfHoSOLlgVPnXfCw3rksghhF2ikFR7GaQh1lDDqLORZ5GLaYo0Sjjx6s73cHx1BkInqykI4REMHTQeHG2v004adVEt4h");
+const stripePromise = loadStripe("pk_test_51RmagwB9ZAOL2FjtapdUHHb36EsnNKX0iRuXdivT1EEeo3UFL7sAqGUHrGFuFZnWFvVGE1s6F6Tt4XaHZCAc3rcG00Hhb0TMSn");
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
