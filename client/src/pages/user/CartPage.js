@@ -71,7 +71,7 @@ const handlePayment = async () => {
         console.log("🧾 Sending cart to backend for payment processing...");
         const cart = JSON.parse(localStorage.getItem("cart")) || [];
       const { data } = await axios.post(
-        "http://localhost:8080/api/v1/product/payment",
+        `${process.env.REACT_APP_API_URL/api/v1/product/payment}`,
         { cart }
       );
 
@@ -96,7 +96,7 @@ const handlePayment = async () => {
         toast.error(result.error.message);
       }
       else if (result.paymentIntent.status === "succeeded") {
-        const { data } = await axios.post("process.env.REACT_APP_API_URL/api/v1/product/paymentConfirm", {
+        const { data } = await axios.post(`${process.env.REACT_APP_API_URL/api/v1/product/paymentConfirm}`, {
     cart,
     payment: {
       id: result.paymentIntent.id,
