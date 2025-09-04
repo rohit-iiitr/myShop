@@ -59,63 +59,60 @@ const CartPage = () => {
 
   // handle payments
 const handlePayment = async () => {
-    // console.log("Cart: ", cart);
+  if (!stripe || !elements) {
+    toast.error("Stripe not loaded yet.");
+    return;
+  }
 
-    if (!stripe || !elements) {
-      toast.error("Stripe not loaded yet.");
+  try {
+    setLoading(true);
+
+    // 🧾 Step 1: create PaymentIntent from backend
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const { data } = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/v1/product/payment`,
+      { cart }
+    );
+
+    const clientSecret = data.clientSecret;
+    if (!clientSecret) {
+      toast.error("Payment setup failed. Try again.");
       return;
     }
 
-    try {
-      setLoading(true);
-        console.log("🧾 Sending cart to backend for payment processing...");
-        const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/v1/product/payment`,
-        { cart }
-      );
+    // 🧾 Step 2: confirm payment on frontend
+    const result = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: elements.getElement(CardElement),
+      },
+    });
 
-      // console.log("🧾 Response from backend:", data);
-
-      const clientSecret = data.clientSecret;
-
-      if (!clientSecret) {
-        console.error("Client secret not received from backend");
-        toast.error("Payment setup failed. Try again.");
-        return;
-      }
-
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
+    if (result.error) {
+      toast.error(result.error.message);
+    } else if (result.paymentIntent.status === "succeeded") {
+      // 🧾 Step 3: confirm order on backend
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/product/paymentConfirm`, {
+        cart,
+        payment: {
+          id: result.paymentIntent.id,
+          amount: result.paymentIntent.amount,
+          success: true,
         },
       });
-      console.log("payment Status :", result.paymentIntent.status === "succeeded");
-      // console.log("Payment Result: ", result);
-      if (result.error) {
-        toast.error(result.error.message);
-      }
-      else if (result.paymentIntent.status === "succeeded") {
-        const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/product/paymentConfirm`, {
-    cart,
-    payment: {
-      id: result.paymentIntent.id,
-      amount: result.paymentIntent.amount,
-      success: true, // ✅ explicitly mark success
-    },
-  });
-        localStorage.removeItem("cart");
-        setCart([]);
-        toast.success("✅ Payment Completed Successfully");
-        navigate("/dashboard/user/orders");
-      }
-    } catch (error) {
-      console.error("Payment Error: ", error);
-      toast.error("❌ Payment Failed");
-    } finally {
-      setLoading(false);
+
+      localStorage.removeItem("cart");
+      setCart([]);
+      toast.success("✅ Payment Completed Successfully");
+      navigate("/dashboard/user/orders");
     }
-  };
+  } catch (error) {
+    console.error("Payment Error: ", error);
+    toast.error("❌ Payment Failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <Layout>
